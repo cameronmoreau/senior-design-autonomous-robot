@@ -55,10 +55,10 @@ void setup()
   long speed = 200;
   
   
-  //K1.s(speed).wait();
-  //K2.s(speed).wait();
-  //K3.s(-speed).wait();
-  //K4.s(-speed).wait();
+//  K1.s(speed).wait();
+//  K2.s(speed).wait();
+//  K3.s(-speed).wait();
+//  K4.s(-speed).wait();
 }
 
 // .wait() waits until the command is 'finished'. For speed, this means it reached near the
