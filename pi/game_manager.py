@@ -5,7 +5,6 @@ class GameManager():
   def __init__(self, config_path):
     self.rounds = []
     self.current_round_index = 0
-    self.current_coins = None
 
     self._load_config(config_path)
 
@@ -21,9 +20,12 @@ class GameManager():
     f = open(config_path, 'r')
     data = json.load(f)
 
+    # Map out rounds
     for key in data['rounds'].keys():
       game_round = GameRound(key, data['rounds'][key])
       self.rounds.append(game_round)
+
+    self.init_coins = data['coins']
 
 class GameRound():
   def __init__(self, title, coins):

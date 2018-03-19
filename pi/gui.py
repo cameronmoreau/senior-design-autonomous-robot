@@ -73,38 +73,6 @@ class GuiApplication(tk.Frame):
       ((7,14), "white")
     ]
 
-    verticies = [
-      (6,6), # inner
-      (10,6),
-      (6,10),
-      (10,10),
-
-      (5,5),
-      (11,5),
-      (5,11),
-      (11,11),
-
-      (4,4),
-      (12,4),
-      (4,12),
-      (12,12),
-
-      (3,3), # Outer
-      (13,3),
-      (3,13),
-      (13,13),
-
-      (3, 8), #left
-      (4, 8),
-      (5, 8),
-      (6, 8),
-
-      (10, 8), #right
-      (11, 8),
-      (12, 8),
-      (13, 8),
-    ]
-
     # draw boxes
     for box in boxes:
       coords, color = box
@@ -118,8 +86,8 @@ class GuiApplication(tk.Frame):
           fill=color
         )
 
-    for vert in verticies:
-      (x, y) = vert
+    for coin in self.game.init_coins:
+      (x, y) = coin
       offset = 6
       start_x = x * CELL_SIZE - offset
       start_y = y * CELL_SIZE - offset
