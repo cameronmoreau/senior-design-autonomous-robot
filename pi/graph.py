@@ -1,3 +1,6 @@
+# Cite
+# http://www.bogotobogo.com/python/python_graph_data_structures.php
+
 class Vertex:
     def __init__(self, node):
         self.id = node
