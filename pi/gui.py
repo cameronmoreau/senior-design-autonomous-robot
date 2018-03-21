@@ -102,7 +102,7 @@ class GuiApplication(tk.Frame):
           y_start,
           x_start + CELL_SIZE,
           y_start + CELL_SIZE,
-          fill="gray76"
+          fill="gray76",  outline="gray60"
         )
 
     boxes = [
@@ -130,6 +130,19 @@ class GuiApplication(tk.Frame):
           fill=color
         )
 
+    # Draw path
+    for p in self.game.temp_path:
+      p1, p2 = p['points']
+      coin_a = self.game.current_coins[str(p1)]
+      coin_b = self.game.current_coins[str(p2)]
+
+      self.canvas.create_line(
+        coin_a.x, coin_a.y,
+        coin_b.x, coin_b.y,
+        fill="black", width=3
+      )
+
+    # Draw coins
     self.canvas_entities['coins'] = dict()
     for coin in self.game.current_coins.values():
       offset = 6

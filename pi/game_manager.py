@@ -37,9 +37,8 @@ class GameManager():
   def _setup_coins(self):
     self.current_coins = dict()
 
-    for i in range(len(self.init_coins)):
-      coin = self.init_coins[i]
-      self.current_coins[i] = GameCoin(i, coin[0] * CELL_SIZE, coin[1] * CELL_SIZE)
+    for k, c in self.init_coins.items():
+      self.current_coins[k] = GameCoin(k, c[0] * CELL_SIZE, c[1] * CELL_SIZE)
 
   def _load_config(self, config_path):
     f = open(config_path, 'r')
@@ -52,6 +51,9 @@ class GameManager():
 
     self.init_coins = data['coins']
     self._setup_coins()
+
+    # Path
+    self.temp_path = data['coin_path']
 
 class GameCoinState(Enum):
   UNVISITED = 1
