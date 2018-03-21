@@ -2,7 +2,7 @@ import tkinter as tk
 import serial
 
 def move(direction, speed):
-    print("moving bot",direction, speed)
+    print("moving bot", direction, speed)
     s = 'm ' + str(direction) + ' ' + str(speed)
     comm.write(s.encode())
 
