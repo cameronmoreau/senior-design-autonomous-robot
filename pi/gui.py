@@ -131,7 +131,7 @@ class GuiApplication(tk.Frame):
         )
 
     # Draw path
-    for p in self.game.temp_path:
+    for p in self.game.init_path:
       p1, p2 = p['points']
       coin_a = self.game.current_coins[str(p1)]
       coin_b = self.game.current_coins[str(p2)]
