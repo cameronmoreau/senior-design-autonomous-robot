@@ -1,6 +1,6 @@
 import serial
 
-class Robot():
+class RobotController():
   def __init__(self, simulate=False):
     if simulate:
       self.serial = dict()
