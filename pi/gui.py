@@ -1,9 +1,11 @@
+from PIL import Image, ImageTk
 import tkinter as tk
 from game_manager import *
 from constants import *
 import time
 from vision_controller import VisionController
 import queue
+import cv2
 import threading
 
 class GuiApplication(tk.Frame):
@@ -30,17 +32,21 @@ class GuiApplication(tk.Frame):
     
     # Vision Controller thread
     self.vision_queue = queue.Queue()
-    self.vision_thread = threading.Thread(target=VisionController, kwargs={'thread_queue': self.vision_queue})
+    self.video_buffer = [None] * 1
+    self.vision_thread = VisionController(thread_queue=self.vision_queue, video_buffer=self.video_buffer)
     self.vision_thread.start()
-    self.after(100, self.process_vision)
+    self.after(100, self.process_vision_cb)
     
-  def process_vision(self):
+    self.update_video_canvas()
+  
+  # process all callbacks from vision  
+  def process_vision_cb(self):
   	try:
   		print(self.vision_queue.get(0))
   	except queue.Empty:
-  		print('Queue is empty, awaiting for more instructions...')
+  		pass
   	finally:
-  		self.after(100, self.process_vision)
+  		self.after(100, self.process_vision_cb)
   		
   def keydown(self, e):
     x = self.local.position_x
@@ -59,8 +65,9 @@ class GuiApplication(tk.Frame):
       self.robot.stop()
 
     elif e.keysym == 'Escape':
-      self.local.stop()
-      self.root.destroy()
+    	self.vision_thread.stop()      
+    	self.local.stop()
+    	self.root.destroy()
 
     # On top of empty coin
     elif e.keysym == '1':
@@ -110,8 +117,12 @@ class GuiApplication(tk.Frame):
 
   def setup_canvas(self):
     self.canvas = tk.Canvas(self, width=GRID_SIZE, height=GRID_SIZE)
-    self.canvas.pack()
+    self.canvas.pack(side="right")
     self.canvas_entities = dict()
+    
+    self.video_canvas = tk.Canvas(self, width=500, height=500)
+    self.video_canvas.create_rectangle(10, 10, 50, 50, fill="pink")
+    self.video_canvas.pack()
 
     for y in range(CELL_COUNT):
       y_start = y * CELL_SIZE
@@ -202,3 +213,17 @@ class GuiApplication(tk.Frame):
     self.canvas.update()
     
     self.root.after(100, self.update_canvas)
+    
+  def update_video_canvas(self):
+  	try:
+  		if self.video_buffer:
+  			img = Image.fromarray(self.video_buffer[0])
+  			img = ImageTk.PhotoImage(image=img)
+  		
+  			self.video_canvas.delete('all')
+  			self.video_canvas.create_image(0, 0, image=img)
+  			self.video_canvas.update()
+  	except:
+  		pass
+  	finally:
+  		self.root.after('idle', self.update_video_canvas)
