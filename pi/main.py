@@ -7,7 +7,7 @@ from localization_manager import *
 from navigation_manager import *
 from localization_manager import *
 
-if __name__ == '__main__':
+def main():
   game = GameManager('config.json')
   robot = RobotController(simulate=True)
   nav = NavigationManager(game.path)
@@ -19,4 +19,8 @@ if __name__ == '__main__':
 
   root = tk.Tk()
   app = GuiApplication(master=root, game_manager=game, robot=robot, localization_manager=local)
+  
   app.mainloop()
+  
+if __name__ == '__main__':
+  main()

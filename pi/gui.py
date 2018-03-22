@@ -2,6 +2,9 @@ import tkinter as tk
 from game_manager import *
 from constants import *
 import time
+from vision_controller import VisionController
+import queue
+import threading
 
 class GuiApplication(tk.Frame):
   def __init__(self, master=None, game_manager=None, robot=None, localization_manager=None):
@@ -24,7 +27,21 @@ class GuiApplication(tk.Frame):
     master.lift()
     master.call('wm', 'attributes', '.', '-topmost', True)
     master.after_idle(master.call, 'wm', 'attributes', '.', '-topmost', False)
-
+    
+    # Vision Controller thread
+    self.vision_queue = queue.Queue()
+    self.vision_thread = threading.Thread(target=VisionController, kwargs={'thread_queue': self.vision_queue})
+    self.vision_thread.start()
+    self.after(100, self.process_vision)
+    
+  def process_vision(self):
+  	try:
+  		print(self.vision_queue.get(0))
+  	except queue.Empty:
+  		print('Queue is empty, awaiting for more instructions...')
+  	finally:
+  		self.after(100, self.process_vision)
+  		
   def keydown(self, e):
     x = self.local.position_x
     y = self.local.position_y
