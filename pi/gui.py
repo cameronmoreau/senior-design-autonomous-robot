@@ -4,12 +4,13 @@ from constants import *
 import time
 
 class GuiApplication(tk.Frame):
-  def __init__(self, master=None, game_manager=None, robot=None):
+  def __init__(self, master=None, game_manager=None, robot=None, localization_manager=None):
     super().__init__(master)
 
     self.root = master
     self.game = game_manager
     self.robot = robot
+    self.local = localization_manager
 
     self.create_widgets()
     self.setup_canvas()
@@ -25,17 +26,24 @@ class GuiApplication(tk.Frame):
     master.after_idle(master.call, 'wm', 'attributes', '.', '-topmost', False)
 
   def keydown(self, e):
-    x, y = self.robot.position
+    x = self.local.position_x
+    y = self.local.position_y
     speed = 5
 
     if e.keysym == 'Down':
-      y += speed
+      self.robot.move(180, 50)
     elif e.keysym == 'Up':
-      y -= speed
+      self.robot.move(0, 50)
     elif e.keysym == 'Left':
-      x -= speed
+      self.robot.move(270, 50)
     elif e.keysym == 'Right':
-      x += speed
+      self.robot.move(90, 50)
+    elif e.keysym == 'space':
+      self.robot.stop()
+
+    elif e.keysym == 'Escape':
+      self.local.stop()
+      self.root.destroy()
 
     # On top of empty coin
     elif e.keysym == '1':
@@ -46,8 +54,7 @@ class GuiApplication(tk.Frame):
         self.canvas_entities['coins'][coin.id],
         fill='red'
       )
-      x = coin.x
-      y = coin.y
+      self.local.set_position(coin.x, coin.y)
 
     # On top of active coin
     elif e.keysym == '2':
@@ -58,10 +65,8 @@ class GuiApplication(tk.Frame):
         self.canvas_entities['coins'][coin.id],
         fill='green'
       )
-      x = coin.x
-      y = coin.y
-
-    self.robot.set_position(x, y)
+      self.local.set_position(coin.x, coin.y)
+    
 
   def create_widgets(self):
     self.next_button = tk.Button(self, text="Next Round", command=self.next_round_pressed)
@@ -162,20 +167,20 @@ class GuiApplication(tk.Frame):
 
     # Draw robot
     self.canvas_entities['robot'] = self.canvas.create_rectangle(
-      self.robot.position[0],
-      self.robot.position[1],
-      self.robot.position[0] + 50,
-      self.robot.position[1] + 50,
+      self.local.position_x - 25,
+      self.local.position_y - 25,
+      self.local.position_x + 25,
+      self.local.position_y + 25,
       fill="green"
     )
 
   def update_canvas(self):
     self.canvas.coords(
       self.canvas_entities['robot'],
-      self.robot.position[0],
-      self.robot.position[1],
-      self.robot.position[0] + 50,
-      self.robot.position[1] + 50,
+      self.local.position_x - 25,
+      self.local.position_y - 25,
+      self.local.position_x + 25,
+      self.local.position_y + 25,
     )
     self.canvas.update()
     
