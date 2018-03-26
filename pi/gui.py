@@ -1,25 +1,23 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 from game_manager import *
+from vision_manager import *
 from constants import *
-import time
-# from vision_controller import VisionController
-import queue
-import cv2
-import threading
 
 class GuiApplication(tk.Frame):
-  def __init__(self, master=None, game_manager=None, robot=None, localization_manager=None):
+  def __init__(self, master=None, game_manager=None, vision=None, robot=None, localization_manager=None):
     super().__init__(master)
 
     self.root = master
     self.game = game_manager
     self.robot = robot
     self.local = localization_manager
+    self.vision = vision
 
     self.create_widgets()
     self.setup_canvas()
     self.update_canvas()
+    self.update_video()
     self.pack()
 
     # Buttons
@@ -29,15 +27,6 @@ class GuiApplication(tk.Frame):
     master.lift()
     master.call('wm', 'attributes', '.', '-topmost', True)
     master.after_idle(master.call, 'wm', 'attributes', '.', '-topmost', False)
-    
-    # Vision Controller thread
-    # self.vision_queue = queue.Queue()
-    # self.video_buffer = [None] * 1
-    # self.vision_thread = VisionController(thread_queue=self.vision_queue, video_buffer=self.video_buffer)
-    # self.vision_thread.start()
-    # self.after(100, self.process_vision_cb)
-    
-    # self.update_video_canvas()
   
   # process all callbacks from vision  
   def process_vision_cb(self):
@@ -104,6 +93,10 @@ class GuiApplication(tk.Frame):
     self.colors_label = tk.Label(self)
     self.colors_label.pack()
 
+    # Setup opencv graphics
+    self.camera_frame = tk.Label(self, width=640, height=480, text="webcam")
+    self.camera_frame.pack(side="right")
+
     self.update_widgets()
 
   def update_widgets(self):
@@ -119,10 +112,6 @@ class GuiApplication(tk.Frame):
     self.canvas = tk.Canvas(self, width=GRID_SIZE, height=GRID_SIZE)
     self.canvas.pack(side="right")
     self.canvas_entities = dict()
-    
-    self.video_canvas = tk.Canvas(self, width=500, height=500)
-    self.video_canvas.create_rectangle(10, 10, 50, 50, fill="pink")
-    self.video_canvas.pack()
 
     for y in range(CELL_COUNT):
       y_start = y * CELL_SIZE
@@ -202,6 +191,16 @@ class GuiApplication(tk.Frame):
       fill="green"
     )
 
+  def update_video(self):
+    frame = self.vision.read_rgb()
+    img = Image.fromarray(frame)
+    imgtk = ImageTk.PhotoImage(image=img)
+    self.camera_frame.imgtk = imgtk
+    self.camera_frame.configure(image=imgtk)
+
+    self.root.after(10, self.update_video)
+
+
   def update_canvas(self):
     self.canvas.coords(
       self.canvas_entities['robot'],
@@ -213,17 +212,3 @@ class GuiApplication(tk.Frame):
     self.canvas.update()
     
     self.root.after(100, self.update_canvas)
-    
-  def update_video_canvas(self):
-  	try:
-  		if self.video_buffer:
-  			img = Image.fromarray(self.video_buffer[0])
-  			img = ImageTk.PhotoImage(image=img)
-  		
-  			self.video_canvas.delete('all')
-  			self.video_canvas.create_image(0, 0, image=img)
-  			self.video_canvas.update()
-  	except:
-  		pass
-  	finally:
-  		self.root.after('idle', self.update_video_canvas)
