@@ -3,14 +3,17 @@ import time
 from robot_controller import *
 
 class LocalizationManager():
-  def __init__(self, robot=None, start_x=None, start_y=None):
+  def __init__(self, robot=None, game=None, start_x=None, start_y=None):
     self.thread = None
     self.robot = robot
+    self.game = game
 
     # Localization vars
     self.position_x = start_x
     self.position_y = start_y
     self.rotation = 0
+
+    self.current_waypoint = None
 
     self.robot.subscribe_to_events(self.__robot_changed)
     self.start()
@@ -29,6 +32,7 @@ class LocalizationManager():
 
   def __robot_changed(self):
     print('LOCALIZATION GOT ROBOT CHANGE')
+
   
   def __handle_update(self):
     # handle estimate
@@ -42,5 +46,15 @@ class LocalizationManager():
         self.position_y += speed
       elif self.robot.direction == 270:
         self.position_x -= speed
+
+      # Waypoint detection
+      if self.current_waypoint is None:
+        c, d = self.game.get_closest_coin(self.position_x, self.position_y)
+        if d < 150:
+          print('IM CURRENTLY AT THE COIN', c.id)
+          self.current_waypoint = c
+      else:
+        d = self.game.get_distance_from_coin(c.id, self.position_x, self.position_y)
+        print("IM AT WAYPOINT", self.current_waypoint.id, "away", d)
 
     self.start()

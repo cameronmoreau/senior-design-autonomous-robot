@@ -11,7 +11,7 @@ if __name__ == '__main__':
   game = GameManager('config.json')
   robot = RobotController(simulate=True)
   nav = NavigationManager(game.path)
-  local = LocalizationManager(robot=robot, start_x=380, start_y=0)
+  local = LocalizationManager(robot=robot, game=game, start_x=380, start_y=0)
 
   print('finding path between 1 and 15')
   p, c = nav.get_route('1', '15')

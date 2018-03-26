@@ -22,6 +22,10 @@ class GameManager():
     
     self.__setup_coins()
 
+  def get_distance_from_coin(self, coin_id, x, y):
+    coin = self.current_coins[coin_id]
+    return (x - coin.x)**2 + (y - coin.y)**2
+
   def get_closest_coin(self, x, y):
     min_dist = float('inf')
     min_coin = None
@@ -33,7 +37,7 @@ class GameManager():
         min_dist = d
         min_coin = coin
 
-    return min_coin
+    return (min_coin, min_dist)
 
   def __setup_coins(self):
     self.current_coins = dict()

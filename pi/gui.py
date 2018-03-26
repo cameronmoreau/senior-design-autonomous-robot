@@ -48,7 +48,7 @@ class GuiApplication(tk.Frame):
     # On top of empty coin
     elif e.keysym == '1':
       print('snapping to empty vertex')
-      coin = self.game.get_closest_coin(x, y)
+      coin, _ = self.game.get_closest_coin(x, y)
       coin.state = GameCoinState.NONEXISTANT
       self.canvas.itemconfig(
         self.canvas_entities['coins'][coin.id],
@@ -59,7 +59,7 @@ class GuiApplication(tk.Frame):
     # On top of active coin
     elif e.keysym == '2':
       print('snapping to new coin')
-      coin = self.game.get_closest_coin(x, y)
+      coin, _ = self.game.get_closest_coin(x, y)
       coin.state = GameCoinState.EXISTS
       self.canvas.itemconfig(
         self.canvas_entities['coins'][coin.id],
