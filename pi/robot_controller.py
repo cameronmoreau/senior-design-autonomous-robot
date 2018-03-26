@@ -19,7 +19,6 @@ class RobotController():
     self.listeners.append(listener_event)
 
   def __notify_event(self):
-    print('EVENT HAPPENING ON ROBOT')
     for e in self.listeners:
       e()
 

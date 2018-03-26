@@ -15,8 +15,9 @@ class LocalizationManager():
     self.position_y = start_y
     self.rotation = 0
 
+    self.listeners = list()
     self.current_waypoint = None
-
+  
     self.robot.subscribe_to_events(self.__robot_changed)
     self.start()
 
@@ -32,11 +33,15 @@ class LocalizationManager():
     if self.thread:
       self.thread.cancel()
 
+  def subscribe_to_events(self, listener_event):
+    self.listeners.append(listener_event)
+
   def __robot_changed(self):
     print('LOCALIZATION GOT ROBOT CHANGE')
 
-  def __robot_waypoint_changed(self):
-    print('WAYPOINT CHANGED')
+  def __notify_event(self):
+    for e in self.listeners:
+      e()
   
   def __handle_update(self):
     # handle estimate
@@ -56,11 +61,11 @@ class LocalizationManager():
         c, d = self.game.get_closest_coin(self.position_x, self.position_y)
         if d < DISTANCE_THRESHOLD:
           self.current_waypoint = c
-          self.__robot_waypoint_changed()
+          self.__notify_event()
       else:
         d = self.game.get_distance_from_coin(self.current_waypoint.id, self.position_x, self.position_y)
         if d > DISTANCE_THRESHOLD:
           self.current_waypoint = None
-          self.__robot_waypoint_changed()
+          self.__notify_event()
 
     self.start()

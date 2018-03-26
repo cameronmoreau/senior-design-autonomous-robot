@@ -1,4 +1,4 @@
-import json
+import json, math
 from enum import Enum
 from functools import reduce
 from constants import *
@@ -25,6 +25,11 @@ class GameManager():
   def get_distance_from_coin(self, coin_id, x, y):
     coin = self.current_coins[coin_id]
     return (x - coin.x)**2 + (y - coin.y)**2
+
+  def get_angle_to_coin(self, coin_id, x, y):
+    coin = self.current_coins[coin_id]
+    rad = math.atan2(coin.y - y, coin.x - x)
+    return math.degrees(rad)
 
   def get_closest_coin(self, x, y):
     min_dist = float('inf')
