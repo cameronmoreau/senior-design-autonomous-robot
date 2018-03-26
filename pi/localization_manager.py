@@ -2,6 +2,8 @@ from threading import Timer
 import time
 from robot_controller import *
 
+DISTANCE_THRESHOLD = 150
+
 class LocalizationManager():
   def __init__(self, robot=None, game=None, start_x=None, start_y=None):
     self.thread = None
@@ -33,6 +35,8 @@ class LocalizationManager():
   def __robot_changed(self):
     print('LOCALIZATION GOT ROBOT CHANGE')
 
+  def __robot_waypoint_changed(self):
+    print('WAYPOINT CHANGED')
   
   def __handle_update(self):
     # handle estimate
@@ -50,11 +54,13 @@ class LocalizationManager():
       # Waypoint detection
       if self.current_waypoint is None:
         c, d = self.game.get_closest_coin(self.position_x, self.position_y)
-        if d < 150:
-          print('IM CURRENTLY AT THE COIN', c.id)
+        if d < DISTANCE_THRESHOLD:
           self.current_waypoint = c
+          self.__robot_waypoint_changed()
       else:
         d = self.game.get_distance_from_coin(self.current_waypoint.id, self.position_x, self.position_y)
-        print("IM AT WAYPOINT", self.current_waypoint.id, "away", d)
+        if d > DISTANCE_THRESHOLD:
+          self.current_waypoint = None
+          self.__robot_waypoint_changed()
 
     self.start()
