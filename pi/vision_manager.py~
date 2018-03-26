@@ -52,7 +52,7 @@ class VisionManager():
 			
 			frame = RemoveBackground(self.frame, false)
 			
-
+			self.frame = RepackImages(self.frame)
 			self.read_lock.release()
 
 	def read(self):
