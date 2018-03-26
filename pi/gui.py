@@ -3,7 +3,7 @@ import tkinter as tk
 from game_manager import *
 from constants import *
 import time
-from vision_controller import VisionController
+# from vision_controller import VisionController
 import queue
 import cv2
 import threading
@@ -31,13 +31,13 @@ class GuiApplication(tk.Frame):
     master.after_idle(master.call, 'wm', 'attributes', '.', '-topmost', False)
     
     # Vision Controller thread
-    self.vision_queue = queue.Queue()
-    self.video_buffer = [None] * 1
-    self.vision_thread = VisionController(thread_queue=self.vision_queue, video_buffer=self.video_buffer)
-    self.vision_thread.start()
-    self.after(100, self.process_vision_cb)
+    # self.vision_queue = queue.Queue()
+    # self.video_buffer = [None] * 1
+    # self.vision_thread = VisionController(thread_queue=self.vision_queue, video_buffer=self.video_buffer)
+    # self.vision_thread.start()
+    # self.after(100, self.process_vision_cb)
     
-    self.update_video_canvas()
+    # self.update_video_canvas()
   
   # process all callbacks from vision  
   def process_vision_cb(self):
@@ -65,7 +65,7 @@ class GuiApplication(tk.Frame):
       self.robot.stop()
 
     elif e.keysym == 'Escape':
-    	self.vision_thread.stop()      
+    	# self.vision_thread.stop()      
     	self.local.stop()
     	self.root.destroy()
 
