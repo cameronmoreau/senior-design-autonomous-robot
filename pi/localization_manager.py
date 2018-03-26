@@ -54,7 +54,7 @@ class LocalizationManager():
           print('IM CURRENTLY AT THE COIN', c.id)
           self.current_waypoint = c
       else:
-        d = self.game.get_distance_from_coin(c.id, self.position_x, self.position_y)
+        d = self.game.get_distance_from_coin(self.current_waypoint.id, self.position_x, self.position_y)
         print("IM AT WAYPOINT", self.current_waypoint.id, "away", d)
 
     self.start()

@@ -16,8 +16,7 @@ class GuiApplication(tk.Frame):
 
     self.create_widgets()
     self.setup_canvas()
-    self.update_canvas()
-    self.update_video()
+    self.update()
     self.pack()
 
     # Buttons
@@ -191,15 +190,18 @@ class GuiApplication(tk.Frame):
       fill="green"
     )
 
+  def update(self):
+    self.update_video()
+    self.update_canvas()
+
+    self.root.after(10, self.update)
+
   def update_video(self):
     frame = self.vision.read_rgb()
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
     self.camera_frame.imgtk = imgtk
     self.camera_frame.configure(image=imgtk)
-
-    self.root.after(10, self.update_video)
-
 
   def update_canvas(self):
     self.canvas.coords(
@@ -210,5 +212,3 @@ class GuiApplication(tk.Frame):
       self.local.position_y + 25,
     )
     self.canvas.update()
-    
-    self.root.after(100, self.update_canvas)
