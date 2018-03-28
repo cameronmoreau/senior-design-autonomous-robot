@@ -26,10 +26,14 @@ class GameManager():
     coin = self.current_coins[coin_id]
     return (x - coin.x)**2 + (y - coin.y)**2
 
-  def get_angle_to_coin(self, coin_id, x, y):
+  def get_bearing_to_coin(self, coin_id, x, y):
     coin = self.current_coins[coin_id]
-    rad = math.atan2(coin.y - y, coin.x - x)
-    return math.degrees(rad)
+    p1 = (x, y)
+    p2 = (coin.x, coin.y)
+    angle = math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
+    bearing = round((90 - angle) % 360)
+
+    return bearing
 
   def get_closest_coin(self, x, y):
     min_dist = float('inf')

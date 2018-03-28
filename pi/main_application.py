@@ -33,7 +33,8 @@ class MainApplication():
       print('Path to 15', d, str(p))
       next_point = p[1]
       x, y = self.local.position_x, self.local.position_y
-      a = self.game.get_angle_to_coin(next_point, x, y)
+      
+      a = self.game.get_bearing_to_coin(next_point, x, y)
       print('Next point', next_point, 'angle is', a)
 
   def start(self):
