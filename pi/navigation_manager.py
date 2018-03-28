@@ -1,9 +1,12 @@
+import copy
+
 class NavigationManager():
   def __init__(self, path):
     self.path = path
 
   def get_route(self, a, b):
-    return self.dijkstra(self.path, a, b);
+    print('getting route', a, b)
+    return self.dijkstra(self.path, a, b, [], {}, {});
 
   # Cite
   # http://www.gilles-bertrand.com/2014/03/dijkstra-algorithm-python-example-source-code-shortest-path.html
@@ -13,6 +16,7 @@ class NavigationManager():
       path=[]
       pred=dest
       while pred != None:
+        print('adding to path', pred)
         path.append(pred)
         pred=predecessors.get(pred,None)
       return (distances[dest], path[::-1])

@@ -1,8 +1,10 @@
+import time, math
 from threading import Timer
-import time
 from robot_controller import *
 
 DISTANCE_THRESHOLD = 150
+DISTANCE_PER_TICK = 5
+ROTATION_PER_TICK = 5
 
 class LocalizationManager():
   def __init__(self, robot=None, game=None, start_x=None, start_y=None):
@@ -45,16 +47,21 @@ class LocalizationManager():
   
   def __handle_update(self):
     # handle estimate
-    if self.robot.is_moving():
-      speed = 5
-      if self.robot.direction == 0:
-        self.position_y -= speed
-      elif self.robot.direction == 90:
-        self.position_x += speed
-      elif self.robot.direction == 180:
-        self.position_y += speed
-      elif self.robot.direction == 270:
-        self.position_x -= speed
+    if self.robot.is_rotating():
+      self.rotation += ROTATION_PER_TICK
+
+    elif self.robot.is_moving():
+      d = math.radians(self.robot.direction)
+      self.position_x += DISTANCE_PER_TICK * math.sin(d)
+      self.position_y += DISTANCE_PER_TICK * math.cos(d)
+      # if self.robot.direction == 0:
+      #   self.position_y -= speed *
+      # elif self.robot.direction == 90:
+      #   self.position_x += speed
+      # elif self.robot.direction == 180:
+      #   self.position_y += speed
+      # elif self.robot.direction == 270:
+      #   self.position_x -= speed
 
       # Waypoint detection
       if self.current_waypoint is None:

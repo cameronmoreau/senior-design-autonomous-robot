@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 from game_manager import *
 from gui import *
@@ -27,7 +28,14 @@ class MainApplication():
   def new_waypoint(self):
     # On new waypoint
     curr = self.local.current_waypoint
+      
     if self.last_waypoint is None and curr is not None:
+      if curr.id == '15':
+        self.robot.stop()
+        messagebox.showinfo(message='FUCK YEAH! give us A pls')
+        return
+
+      print('Current', curr.id, self.nav.get_route(str(curr.id), '15'))
       self.robot.stop()
       d, p = self.nav.get_route(curr.id, '15')
       print('Path to 15', d, str(p))
@@ -36,6 +44,7 @@ class MainApplication():
       
       a = self.game.get_bearing_to_coin(next_point, x, y)
       print('Next point', next_point, 'angle is', a)
+      self.robot.move(a, 5)
 
   def start(self):
     self.vision.start()

@@ -11,7 +11,8 @@ class RobotController():
       self.serial = serial.Serial('/dev/ttyACM0', 9600)
 
     self.speed = 0
-    self.direction = 0
+    self.direction = 0 # Direction in degrees
+    self.rotating_direction = 0 # Direction 1 clockwise, -1 counter, 0 nothing
 
     self.listeners = list()
 
@@ -24,6 +25,9 @@ class RobotController():
 
   def is_moving(self):
     return self.speed > 0
+
+  def is_rotating(self):
+    return self.rotating_direction != 0 and self.speed > 0
 
   def move(self, direction, speed):
     print("moving robot", direction, speed)
@@ -38,7 +42,16 @@ class RobotController():
     # Send event
     self.__notify_event()
 
+  def rotate(self, direction, speed):
+    self.rotating_direction = direction
+    self.speed = speed
+
+    # Send event
+    self.__notify_event()
+
   def stop(self):
+    self.direction = 0
+    self.rotating_direction = 0
     self.set_speed(0)
 
   def set_speed(self, speed):
