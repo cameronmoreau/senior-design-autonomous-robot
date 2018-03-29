@@ -41,16 +41,16 @@ class GuiApplication(tk.Frame):
   def keydown(self, e):
     x = self.local.position_x
     y = self.local.position_y
-    speed = 5
+    speed = 350
 
     if e.keysym == 'Down':
-      self.robot.move(180, 50)
+      self.robot.move(180, speed)
     elif e.keysym == 'Up':
-      self.robot.move(0, 50)
+      self.robot.move(0, speed)
     elif e.keysym == 'Left':
-      self.robot.move(270, 50)
+      self.robot.move(270, speed)
     elif e.keysym == 'Right':
-      self.robot.move(90, 50)
+      self.robot.move(90, speed)
     elif e.keysym == 'space':
       self.robot.stop()
 

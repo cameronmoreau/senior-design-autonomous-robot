@@ -14,7 +14,7 @@ class MainApplication():
   def __init__(self):
     self.commandQueue = queue.Queue()
     self.game = GameManager('config.json')
-    self.robot = RobotController(simulate=True)
+    self.robot = RobotController(simulate=False)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
     self.vision = VisionManager(self.commandQueue)

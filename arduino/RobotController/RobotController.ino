@@ -26,6 +26,7 @@ KangarooChannel K4(KRight, '2');
 
 int speed = 0;
 int direction = 0;
+int MAX_SPEED = 400;
 
 void setup()
 {
@@ -47,18 +48,6 @@ void setup()
   K3.home().wait();
   K4.start();
   K4.home().wait();
-
-    // Begin wheel spinning
-  long minimum = K1.getMin().value();
-  long maximum = K1.getMax().value();
-  //long speed   = (maximum - minimum) / 10; // 1/10th of the range per second
-  long speed = 200;
-  
-  
-//  K1.s(speed).wait();
-//  K2.s(speed).wait();
-//  K3.s(-speed).wait();
-//  K4.s(-speed).wait();
 }
 
 // .wait() waits until the command is 'finished'. For speed, this means it reached near the
@@ -83,6 +72,10 @@ void displayHeartbeat()
   Serial.printf("Speed %i, Direction %i\n", speed, direction);  
 }
 
+int getSpeedFromPercent(int percent) {
+  return (percent / 100.0) * MAX_SPEED;
+}
+
 /**
  * changeMovement
  * Move the robot given a direction in degrees and speed to move
@@ -97,13 +90,13 @@ void changeMovement(char *directionInput, char *speedInput)
 
   // Parse input
   if (directionInput != NULL) direction = atoi(directionInput);
-  if (speedInput != NULL) speed = atoi(speedInput);
+  if (speedInput != NULL) speed = getSpeedFromPercent(atoi(speedInput));
 
   // Temp direction 0 forward, 90 right, 180 back, 270 left
   if (direction == 0) { adjusters[2] = -1; adjusters[3] = -1; }
-  else if (direction == 90) { adjusters[1] = -1; adjusters[2] = -1; }
+  else if (direction == 90) { adjusters[0] = -1; adjusters[3] = -1; }
   else if (direction == 180) { adjusters[0] = -1; adjusters[1] = -1; }
-  else if (direction == 270) { adjusters[0] = -1; adjusters[3] = -1; }
+  else if (direction == 270) { adjusters[1] = -1; adjusters[2] = -1; }
   // temp
   else { speed = 0; }
 
@@ -114,6 +107,22 @@ void changeMovement(char *directionInput, char *speedInput)
   K4.s(speed * adjusters[3]).wait();
 
   Serial.printf("Updating movement: %d at speed %d\n", direction, speed);
+}
+
+void changeMovementRaw(char *si1, char *si2, char *si3, char *si4) {
+  int speeds[] = {0, 0, 0, 0};
+  if (si1 != NULL) speeds[0] = getSpeedFromPercent(atoi(si1));
+  if (si2 != NULL) speeds[1] = getSpeedFromPercent(atoi(si2));
+  if (si3 != NULL) speeds[2] = getSpeedFromPercent(atoi(si3));
+  if (si4 != NULL) speeds[3] = getSpeedFromPercent(atoi(si4));
+
+  // Run motors
+  K1.s(speeds[0]).wait();
+  K2.s(speeds[1]).wait();
+  K3.s(speeds[2]).wait();
+  K4.s(speeds[3]).wait();
+
+  Serial.printf("Manual speed wheels: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
 }
 
 void consumeIncommingMessage()
@@ -128,7 +137,7 @@ void consumeIncommingMessage()
 
   // Tokenize string
   int i = 0;
-  char *split[] = {NULL, NULL, NULL};
+  char *split[] = {NULL, NULL, NULL, NULL, NULL};
   char *token = strtok(buffer, " ");
   while (token) {
     split[i++] = token;
@@ -139,6 +148,7 @@ void consumeIncommingMessage()
     if (strcmp(split[0], "h") == 0) displayHeartbeat();                       // r
     else if (strcmp(split[0], "r") == 0) Serial.println("TODO ROTATE");       // r <deg> <speed>
     else if (strcmp(split[0], "m") == 0) changeMovement(split[1], split[2]);  // m <direction> <speed>
+    else if (strcmp(split[0], "c") == 0) changeMovementRaw(split[1], split[2], split[3], split[4]); // c <speed1> <speed2> ...
   }
 
   free(buffer);  
