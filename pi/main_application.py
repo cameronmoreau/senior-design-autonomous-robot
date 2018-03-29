@@ -8,14 +8,16 @@ from localization_manager import *
 from navigation_manager import *
 from localization_manager import *
 from vision_manager import *
+import queue
 
 class MainApplication():
   def __init__(self):
+    self.commandQueue = queue.Queue()
     self.game = GameManager('config.json')
     self.robot = RobotController(simulate=True)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
-    self.vision = VisionManager()
+    self.vision = VisionManager(self.commandQueue)
 
     # UI
     root = tk.Tk()
@@ -24,7 +26,6 @@ class MainApplication():
     # TEMP
     self.local.subscribe_to_events(self.new_waypoint)
     self.last_waypoint = None
-
   def new_waypoint(self):
     # On new waypoint
     curr = self.local.current_waypoint

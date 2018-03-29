@@ -8,6 +8,10 @@ import time
 import cv2
 import numpy as np
 from threading import Thread, Lock
+import image
+import utils
+
+N_SLICES = 8
 
 # Use pi cam or regular cam
 if 'pi' in sys.argv:
@@ -17,7 +21,7 @@ else:
 	print('Not a pi')
 
 class VisionManager():
-	def __init__(self):
+	def __init__(self, commandQueue):
 		self.stream = cv2.VideoCapture(0)
 
 		# Set width/height
@@ -27,6 +31,11 @@ class VisionManager():
 		(self.grabbed, self.frame) = self.stream.read()
 		self.running = False
 		self.read_lock = Lock()
+		self.commandQueue = commandQueue
+		self.frames = []
+		
+		for i in range(N_SLICES):
+			self.frames.append(image.Image())
 
 	def start(self):
 		if self.running:
@@ -56,10 +65,18 @@ class VisionManager():
 		return frame
 
 	# Used for tk
-	def read_rgb(self):
+	def read_rgb(self, detect_lanes=True):
 		frame = self.read()
 		(b,g,r) = cv2.split(frame)
-		return cv2.merge((r,g,b))
+		frame = cv2.merge((r, g, b))
+		
+		if detect_lanes:
+			tmp_frame = utils.RemoveBackground(frame, False)
+			
+			directions = utils.SlicePart(tmp_frame, self.frames, N_SLICES)
+			print(directions)
+			
+		return frame
 
 	def stop(self):
 		self.running = False

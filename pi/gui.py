@@ -200,8 +200,6 @@ class GuiApplication(tk.Frame):
 
   def update_video(self):
     frame = self.vision.read_rgb()
-    frame = utils.RemoveBackground(frame, False)
-    
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
     self.camera_frame.imgtk = imgtk
