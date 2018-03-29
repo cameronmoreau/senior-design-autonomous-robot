@@ -86,27 +86,3 @@ class VisionManager():
 
 	def __exit__(self, exec_type, exec_val, traceback):
 		self.stream.release()
-
-# class VisionController():
-# 	def __init__(self, thread_queue=None, video_buffer=None):
-# 		self.active = False
-
-# 		threading.Thread.__init__(self)
-# 		if thread_queue:
-# 			self.thread_queue = thread_queue
-# 		if video_buffer:
-# 			self.video_buffer = video_buffer
-			
-# 		self.cap = cv2.VideoCapture(0)
-			
-# 	def run(self):
-# 		self.active = True
-# 		while self.active:
-# 			_, image = self.cap.read()
-			
-# 			self.video_buffer[0] = image
-	
-# 	def stop(self):
-# 		self.active = False
-# 		if self.is_alive():
-# 			self.join()
