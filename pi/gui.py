@@ -3,6 +3,8 @@ import tkinter as tk
 from game_manager import *
 from vision_manager import *
 from constants import *
+import image
+import utils
 
 class GuiApplication(tk.Frame):
   def __init__(self, master=None, game_manager=None, vision=None, robot=None, localization_manager=None):
@@ -198,6 +200,8 @@ class GuiApplication(tk.Frame):
 
   def update_video(self):
     frame = self.vision.read_rgb()
+    frame = utils.RemoveBackground(frame, False)
+    
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
     self.camera_frame.imgtk = imgtk
