@@ -11,6 +11,9 @@ class Image:
         
     def get_direction(self):
     	return self.dir
+    
+    def getContour(self):
+    	return self.contourCenterX
 
     def Process(self):
         imgray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY) #Convert to Gray Scale
@@ -53,7 +56,7 @@ class Image:
 
         x = int(M["m10"]/M["m00"])
         y = int(M["m01"]/M["m00"])
-
+        
         return [x,y]
 
     def getContourExtent(self, contour):

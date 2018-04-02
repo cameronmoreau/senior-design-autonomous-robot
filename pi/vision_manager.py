@@ -10,6 +10,7 @@ import numpy as np
 from threading import Thread, Lock
 import image
 import utils
+import statistics
 
 N_SLICES = 8
 
@@ -33,6 +34,7 @@ class VisionManager():
 		self.read_lock = Lock()
 		self.commandQueue = commandQueue
 		self.frames = []
+		self.onVertex = False
 		
 		for i in range(N_SLICES):
 			self.frames.append(image.Image())
@@ -73,9 +75,19 @@ class VisionManager():
 		if detect_lanes:
 			tmp_frame = utils.RemoveBackground(frame, False)
 			
-			directions = utils.SlicePart(tmp_frame, self.frames, N_SLICES)
-			print(directions)
+			directions, contours = utils.SlicePart(tmp_frame, self.frames, N_SLICES)
 			
+			# Check vertex every 2 seconds
+			if int(time.time() % 2) == 0:
+				vertex = True if statistics.stdev(contours[3:7]) >= 30 else False
+				if vertex != self.onVertex:
+					# Do callback here
+					pass
+					
+				print('On vertex: ' + str(vertex))
+				
+				self.onVertex = vertex
+					
 		return frame
 
 	def stop(self):

@@ -7,6 +7,7 @@ def SlicePart(im, images, slices):
     height, width = im.shape[:2]
     sl = int(height/slices);
     directions = [1] * len(images)
+    contours = [1] * len(images)
     
     # Top to bottom
     for i in range(slices):
@@ -15,7 +16,9 @@ def SlicePart(im, images, slices):
         images[i].image = crop_img
         images[i].Process()
         directions[i] = images[i].get_direction()
-    return directions
+        contours[i] = images[i].getContour()
+        
+    return directions, contours
 
 def RepackImages(images):
     img = images[0].image
