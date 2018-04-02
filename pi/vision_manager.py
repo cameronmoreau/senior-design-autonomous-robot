@@ -91,7 +91,7 @@ class VisionManager():
 				m = statistics.mean(directions[0:6])
 				
 				if m >= 80 or m <= -80:
-					self.direction_callback(m / 300)
+					self.direction_callback(m / 250)
 					
 		return frame
 
