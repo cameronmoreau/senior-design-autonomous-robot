@@ -17,7 +17,8 @@ class MainApplication():
     self.robot = RobotController(simulate=False)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
-    self.vision = VisionManager(vertex_callback=self.local.on_vertex_change)
+    self.vision = VisionManager(vertex_callback=self.local.on_vertex_change,
+    																	direction_callback=self.local.on_direction_change)
 
     # UI
     root = tk.Tk()

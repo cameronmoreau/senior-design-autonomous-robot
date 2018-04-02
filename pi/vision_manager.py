@@ -22,7 +22,7 @@ else:
 	print('Not a pi')
 
 class VisionManager():
-	def __init__(self, vertex_callback=None):
+	def __init__(self, vertex_callback=None, direction_callback=None):
 		self.stream = cv2.VideoCapture(0)
 
 		# Set width/height
@@ -36,6 +36,7 @@ class VisionManager():
 		self.on_vertex = False
 		
 		self.vertex_callback = vertex_callback
+		self.direction_callback = direction_callback
 		
 		for i in range(N_SLICES):
 			self.frames.append(image.Image())
@@ -85,6 +86,13 @@ class VisionManager():
 					self.vertex_callback(vertex)
 					
 				self.on_vertex = vertex
+			
+			if not self.on_vertex:	
+				m = statistics.mean(directions[0:6])
+				d = -400 if m < 0 else 400
+				
+				if m >= 80 or m <= -80: # Need to turn left
+					self.direction_callback(m / d)
 					
 		return frame
 

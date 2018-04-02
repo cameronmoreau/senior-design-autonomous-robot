@@ -23,9 +23,13 @@ class LocalizationManager():
     self.robot.subscribe_to_events(self.__robot_changed)
     self.start()
   
+  # This is where you the callback for vertex detection is. If on_vertex is True it is on vertex, false is not
   def on_vertex_change(self, on_vertex):
   	print(str(on_vertex))
-
+  	
+  def on_direction_change(self, direction):
+  	print(str(direction))
+  	
   def set_position(self, x, y):
     self.position_x = x
     self.position_y = y
