@@ -22,7 +22,7 @@ else:
 	print('Not a pi')
 
 class VisionManager():
-	def __init__(self, commandQueue):
+	def __init__(self, vertex_callback=None):
 		self.stream = cv2.VideoCapture(0)
 
 		# Set width/height
@@ -32,9 +32,10 @@ class VisionManager():
 		(self.grabbed, self.frame) = self.stream.read()
 		self.running = False
 		self.read_lock = Lock()
-		self.commandQueue = commandQueue
 		self.frames = []
-		self.onVertex = False
+		self.on_vertex = False
+		
+		self.vertex_callback = vertex_callback
 		
 		for i in range(N_SLICES):
 			self.frames.append(image.Image())
@@ -79,14 +80,11 @@ class VisionManager():
 			
 			# Check vertex every 2 seconds
 			if int(time.time() % 2) == 0:
-				vertex = True if statistics.stdev(contours[3:7]) >= 30 else False
-				if vertex != self.onVertex:
-					# Do callback here
-					pass
+				vertex = True if statistics.stdev(contours[0:5]) >= 30 else False
+				if vertex != self.on_vertex and self.vertex_callback:
+					self.vertex_callback(vertex)
 					
-				print('On vertex: ' + str(vertex))
-				
-				self.onVertex = vertex
+				self.on_vertex = vertex
 					
 		return frame
 

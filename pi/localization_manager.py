@@ -22,6 +22,9 @@ class LocalizationManager():
   
     self.robot.subscribe_to_events(self.__robot_changed)
     self.start()
+  
+  def on_vertex_change(self, on_vertex):
+  	print(str(on_vertex))
 
   def set_position(self, x, y):
     self.position_x = x
