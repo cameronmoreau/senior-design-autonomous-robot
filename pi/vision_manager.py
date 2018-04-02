@@ -89,10 +89,9 @@ class VisionManager():
 			
 			if not self.on_vertex:	
 				m = statistics.mean(directions[0:6])
-				d = -400 if m < 0 else 400
 				
-				if m >= 80 or m <= -80: # Need to turn left
-					self.direction_callback(m / d)
+				if m >= 80 or m <= -80:
+					self.direction_callback(m / 300)
 					
 		return frame
 
