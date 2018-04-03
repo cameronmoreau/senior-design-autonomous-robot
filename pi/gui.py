@@ -200,10 +200,12 @@ class GuiApplication(tk.Frame):
 
   def update_video(self):
     frame = self.vision.read_rgb()
-    img = Image.fromarray(frame)
-    imgtk = ImageTk.PhotoImage(image=img)
-    self.camera_frame.imgtk = imgtk
-    self.camera_frame.configure(image=imgtk)
+    
+    if frame is not None:
+      img = Image.fromarray(frame)
+      imgtk = ImageTk.PhotoImage(image=img)
+      self.camera_frame.imgtk = imgtk
+      self.camera_frame.configure(image=imgtk)
 
   def update_canvas(self):
     self.canvas.coords(
