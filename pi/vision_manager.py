@@ -29,24 +29,22 @@ else:
 
 class VisionManager():
 	def __init__(self, vertex_callback=None, direction_callback=None):
-		self.stream = None
+		self.camera = None
 		
 		if USE_PI:
-		  self.stream = PiVideoStream(resolution=(640,480))
+		  self.camera = PiVideoStream(resolution=(640,480))
 		  #camera = PiCamera()
 		  #camera.resolution = (640, 480)
 		  #raw_capture = PiRGBArray(camera, size=camera.resolution)
 		  #self.stream = camera.capture_continuous(raw_capture, format='bgr', use_vido_port=True)
 		else:
-		  self.stream = cv2.VideoCapture(0)
+		  #self.stream = cv2.VideoCapture(0)
+		  self.camera = WebcamVideoStream(src=0)
 		  
 		  # Set width/height
-		  self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-		  self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+		  self.camera.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+		  self.camera.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-		(self.grabbed, self.frame) = self.stream.read()
-		self.running = False
-		self.read_lock = Lock()
 		self.frames = []
 		self.on_vertex = False
 		
@@ -57,35 +55,13 @@ class VisionManager():
 			self.frames.append(image.Image())
 
 	def start(self):
-		if self.running:
-			print('Already started capture')
-			return None
-
-		self.running = True
-		self.thread = Thread(target=self.update, args=())
-		self.thread.start()
+		self.camera.start()
 
 		return self
 
-	def update(self):
-		while self.running:
-			(grabbed, frame) = self.stream.read()
-
-			# Lock
-			self.read_lock.acquire()
-			self.grabbed = grabbed
-			self.frame = frame
-			self.read_lock.release()
-
-	def read(self):
-		self.read_lock.acquire()
-		frame = self.frame.copy()
-		self.read_lock.release()
-		return frame
-
 	# Used for tk
 	def read_rgb(self, detect_lanes=True):
-		frame = self.read()
+		frame = self.camera.read()
 		(b,g,r) = cv2.split(frame)
 		frame = cv2.merge((r, g, b))
 		
@@ -111,10 +87,10 @@ class VisionManager():
 		return frame
 
 	def stop(self):
-		self.running = False
+		self.camera.stop()
 
-		if self.thread.is_alive():
-			self.thread.join()
+		# if self.thread.is_alive():
+		# 	self.thread.join()
 
-	def __exit__(self, exec_type, exec_val, traceback):
-		self.stream.release()
+	# def __exit__(self, exec_type, exec_val, traceback):
+	# 	self.stream.release()
