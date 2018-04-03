@@ -24,9 +24,7 @@ KangarooChannel K2(KLeft, '2');
 KangarooChannel K3(KRight, '1');
 KangarooChannel K4(KRight, '2');
 
-int speed = 0;
-int direction = 0;
-int MAX_SPEED = 400;
+int speeds[] = {0, 0, 0, 0};
 
 void setup()
 {
@@ -39,7 +37,11 @@ void setup()
   Serial.begin(9600);
   delay(500);
   Serial.println("setup()");
-  
+
+  // .wait() waits until the command is 'finished'. For speed, this means it reached near the
+  // requested speed. You can also call K1.s(speed); without .wait() if you want to command it
+  // but not wait to get up to speed. If you do this, you may want to use K1.getS().value()
+  // to check progress.
   K1.start();
   K1.home().wait();
   K2.start();
@@ -50,10 +52,6 @@ void setup()
   K4.home().wait();
 }
 
-// .wait() waits until the command is 'finished'. For speed, this means it reached near the
-// requested speed. You can also call K1.s(speed); without .wait() if you want to command it
-// but not wait to get up to speed. If you do this, you may want to use K1.getS().value()
-// to check progress.
 void loop()
 {
   // Send heartbeat message
@@ -67,54 +65,32 @@ void loop()
   delay(200);
 }
 
+/**
+ * Display a heardbeat and info messages
+ */
 void displayHeartbeat()
 {
-  Serial.printf("Speed %i, Direction %i\n", speed, direction);  
-}
-
-int getSpeedFromPercent(int percent) {
-  return (percent / 100.0) * MAX_SPEED;
+  Serial.printf("I'm alive. Speeds: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);  
 }
 
 /**
- * changeMovement
- * Move the robot given a direction in degrees and speed to move
+ * This method drives the 4 motors at individual speeds
  * 
- * @param directionInput NULL or input of direction
- * @param speedInput NULL or speed to move
+ * @param si1 NULL or input of motor 1 speed
+ * @param si2 NULL or input of motor 2 speed
+ * @param si3 NULL or input of motor 3 speed
+ * @param si4 NULL or input of motor 4 speed
  */
-void changeMovement(char *directionInput, char *speedInput)
+void changeMovement(char *si1, char *si2, char *si3, char *si4)
 {
-  speed = 0, direction = 0;
-  int adjusters[] = {1, 1, 1, 1};
-
-  // Parse input
-  if (directionInput != NULL) direction = atoi(directionInput);
-  if (speedInput != NULL) speed = getSpeedFromPercent(atoi(speedInput));
-
-  // Temp direction 0 forward, 90 right, 180 back, 270 left
-  if (direction == 0) { adjusters[2] = -1; adjusters[3] = -1; }
-  else if (direction == 90) { adjusters[0] = -1; adjusters[3] = -1; }
-  else if (direction == 180) { adjusters[0] = -1; adjusters[1] = -1; }
-  else if (direction == 270) { adjusters[1] = -1; adjusters[2] = -1; }
-  // temp
-  else { speed = 0; }
-
-  // Run motors
-  K1.s(speed * adjusters[0]).wait();
-  K2.s(speed * adjusters[1]).wait();
-  K3.s(speed * adjusters[2]).wait();
-  K4.s(speed * adjusters[3]).wait();
-
-  Serial.printf("Updating movement: %d at speed %d\n", direction, speed);
-}
-
-void changeMovementRaw(char *si1, char *si2, char *si3, char *si4) {
-  int speeds[] = {0, 0, 0, 0};
-  if (si1 != NULL) speeds[0] = getSpeedFromPercent(atoi(si1));
-  if (si2 != NULL) speeds[1] = getSpeedFromPercent(atoi(si2));
-  if (si3 != NULL) speeds[2] = getSpeedFromPercent(atoi(si3));
-  if (si4 != NULL) speeds[3] = getSpeedFromPercent(atoi(si4));
+  // Reset global speeds to 0
+  memset(speeds, 0, sizeof(speeds));
+  
+  // Input to speed
+  if (si1 != NULL) speeds[0] = atoi(si1);
+  if (si2 != NULL) speeds[1] = atoi(si2);
+  if (si3 != NULL) speeds[2] = atoi(si3);
+  if (si4 != NULL) speeds[3] = atoi(si4);
 
   // Run motors
   K1.s(speeds[0]).wait();
@@ -122,9 +98,13 @@ void changeMovementRaw(char *si1, char *si2, char *si3, char *si4) {
   K3.s(speeds[2]).wait();
   K4.s(speeds[3]).wait();
 
+  // Report
   Serial.printf("Manual speed wheels: %d %d %d %d\n", speeds[0], speeds[1], speeds[2], speeds[3]);
 }
 
+/**
+ * Read serial input and run events
+ */
 void consumeIncommingMessage()
 {
   int bytes = Serial.available();
@@ -145,10 +125,9 @@ void consumeIncommingMessage()
   }
 
   if (split[0] != NULL) {
-    if (strcmp(split[0], "h") == 0) displayHeartbeat();                       // r
-    else if (strcmp(split[0], "r") == 0) Serial.println("TODO ROTATE");       // r <deg> <speed>
-    else if (strcmp(split[0], "m") == 0) changeMovement(split[1], split[2]);  // m <direction> <speed>
-    else if (strcmp(split[0], "c") == 0) changeMovementRaw(split[1], split[2], split[3], split[4]); // c <speed1> <speed2> ...
+    if (strcmp(split[0], "h") == 0) displayHeartbeat();                       // h
+    else if (strcmp(split[0], "g") == 0) Serial.println("TODO GRABBER");       // g
+    else if (strcmp(split[0], "m") == 0) changeMovement(split[1], split[2], split[3], split[4]); // m <speed1> <speed2> <speed3> <speed4>
   }
 
   free(buffer);  
