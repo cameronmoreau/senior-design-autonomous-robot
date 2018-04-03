@@ -29,6 +29,11 @@ class RobotController():
   def is_rotating(self):
     return self.rotating_direction != 0 and self.speed > 0
 
+  def move_raw(self, s1, s2, s3, s4):
+    if not self.simulate:
+      s = 'm %s %s %s %s' % (str(s1), str(s2), str(s3), str(s4))
+      self.serial.write(s.encode())
+    
   def move(self, direction, speed):
     print("moving robot", direction, speed)
     self.direction = direction
@@ -36,8 +41,25 @@ class RobotController():
 
     # Send serial
     if not self.simulate:
-      s = 'm ' + str(direction) + ' ' + str(speed)
+      adjustments = [1, 1, 1, 1]
+      if direction == 0:
+        adjustments[2] = -1
+        adjustments[3] = -1
+      elif direction == 90:
+        adjustments[0] = -1
+        adjustments[3] = -1
+      elif direction == 180:
+        adjustments[0] = -1
+        adjustments[1] = -1
+      elif direction == 270:
+        adjustments[1] = -1
+        adjustments[2] = -1
+    	
+    s = 'm %s %s %s %s' % (str(speed * adjustments[0]), str(speed * adjustments[1]), str(speed * adjustments[2]), str(speed * adjustments[3]))
+    try:
       self.serial.write(s.encode())
+    except:
+       print('Couldnt write serial')
     
     # Send event
     self.__notify_event()

@@ -13,21 +13,36 @@ import utils
 import statistics
 
 N_SLICES = 8
+USE_PI = False
+
+if 'pi' in sys.argv:
+  USE_PI = True
 
 # Use pi cam or regular cam
-if 'pi' in sys.argv:
+if USE_PI:
 	from picamera.array import PiRGBArray
 	from picamera import PiCamera
+	from imutils.video.pivideostream import PiVideoStream
 else:
-	print('Not a pi')
+  from imutils.video.webcamvideostream import WebcamVideoStream
+  print('Not a pi')
 
 class VisionManager():
 	def __init__(self, vertex_callback=None, direction_callback=None):
-		self.stream = cv2.VideoCapture(0)
-
-		# Set width/height
-		self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-		self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+		self.stream = None
+		
+		if USE_PI:
+		  self.stream = PiVideoStream(resolution=(640,480))
+		  #camera = PiCamera()
+		  #camera.resolution = (640, 480)
+		  #raw_capture = PiRGBArray(camera, size=camera.resolution)
+		  #self.stream = camera.capture_continuous(raw_capture, format='bgr', use_vido_port=True)
+		else:
+		  self.stream = cv2.VideoCapture(0)
+		  
+		  # Set width/height
+		  self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+		  self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 		(self.grabbed, self.frame) = self.stream.read()
 		self.running = False
@@ -89,10 +104,10 @@ class VisionManager():
 			
 			if not self.on_vertex:	
 				m = statistics.mean(directions[0:6])
+				self.direction_callback(m/250)
 				
-				if m >= 80 or m <= -80:
-					self.direction_callback(m / 250)
-					
+				#if m >= 80 or m <= -80:
+					#self.direction_callback(m / 250)
 		return frame
 
 	def stop(self):
