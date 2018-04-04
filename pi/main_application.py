@@ -9,15 +9,18 @@ from localization_manager import *
 from navigation_manager import *
 from localization_manager import *
 from vision_manager import *
-import queue
+
+USE_SERIAL = False
+
+if 'serial' in sys.argv:
+  USE_SERIAL = True
 
 class MainApplication():
   def __init__(self):
     self.last_time = time.time()
     
-    self.commandQueue = queue.Queue()
     self.game = GameManager('config.json')
-    self.robot = RobotController(simulate=True)
+    self.robot = RobotController(simulate=not USE_SERIAL)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
     #self.vision = VisionManager(vertex_callback=self.local.on_vertex_change, direction_callback=self.local.on_direction_change)
