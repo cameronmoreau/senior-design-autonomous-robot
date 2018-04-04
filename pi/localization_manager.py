@@ -61,14 +61,6 @@ class LocalizationManager():
       d = math.radians(self.robot.direction)
       self.position_x += DISTANCE_PER_TICK * math.sin(d)
       self.position_y += DISTANCE_PER_TICK * math.cos(d)
-      # if self.robot.direction == 0:
-      #   self.position_y -= speed *
-      # elif self.robot.direction == 90:
-      #   self.position_x += speed
-      # elif self.robot.direction == 180:
-      #   self.position_y += speed
-      # elif self.robot.direction == 270:
-      #   self.position_x -= speed
 
       # Waypoint detection
       if self.current_waypoint is None:

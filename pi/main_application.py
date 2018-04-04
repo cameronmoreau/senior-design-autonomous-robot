@@ -20,9 +20,9 @@ if 'nogui' in sys.argv:
   USE_GUI = False
 
 class MainApplication():
-  def __init__(self):
+  def __init__(self, gui=True):
     self.last_time = time.time()
-    self.show_gui = USE_GUI
+    self.show_gui = gui
 
     # TEMP
     self.reached_vertex = False
@@ -44,6 +44,9 @@ class MainApplication():
     self.robot.move_raw(200, 200, -200, -200)
     #self.local.subscribe_to_events(self.new_waypoint)
     #self.last_waypoint = None
+
+  def stop_robot(self):
+    self.robot.stop()
     
   def direction_callback(self, direction):
     if self.reached_vertex:
@@ -64,10 +67,6 @@ class MainApplication():
        print('GO STRIAGHT')
     
   def vertex_callback(self, vertex):
-    print('AT VERTEX!')
-    if self.reached_vertex:
-      return
-      
     self.reached_vertex = True
     self.robot.stop()
 

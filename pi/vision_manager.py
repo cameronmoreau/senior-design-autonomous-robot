@@ -34,7 +34,7 @@ class VisionManager():
 		  self.camera = PiVideoStream(resolution=(640,480))
 		else:
 		  #self.stream = cv2.VideoCapture(0)
-		  self.camera = WebcamVideoStream(src=1)
+		  self.camera = WebcamVideoStream(src=0)
 		  
 		  # Set width/height
 		  self.camera.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -84,9 +84,3 @@ class VisionManager():
 
 	def stop(self):
 		self.camera.stop()
-
-		# if self.thread.is_alive():
-		# 	self.thread.join()
-
-	# def __exit__(self, exec_type, exec_val, traceback):
-	# 	self.stream.release()
