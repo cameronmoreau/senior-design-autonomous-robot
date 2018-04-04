@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-import time
+import time, threading
 
 from game_manager import *
 from gui import *
@@ -9,50 +9,85 @@ from localization_manager import *
 from navigation_manager import *
 from localization_manager import *
 from vision_manager import *
+from toggle_manager import *
 
 USE_SERIAL = False
+USE_GUI = True
 
 if 'serial' in sys.argv:
   USE_SERIAL = True
 
+if 'nogui' in sys.argv:
+  USE_GUI = False
+
+TOP_SPEED = 500
+MIN_SPEED = 300
+
 class MainApplication():
   def __init__(self):
     self.last_time = time.time()
+    self.show_gui = USE_GUI
+
+    # TEMP
+    self.reached_vertex = True
     
+    # State
+    self.is_toggled = False
+    
+    # REAL STUFF
     self.game = GameManager('config.json')
     self.robot = RobotController(simulate=not USE_SERIAL)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
     #self.vision = VisionManager(vertex_callback=self.local.on_vertex_change, direction_callback=self.local.on_direction_change)
     self.vision = VisionManager(vertex_callback=self.vertex_callback, direction_callback=self.direction_callback)
-
+    self.toggle = ToggleManager(toggle_callback=self.toggle_callback)
+    
     # UI
-    root = tk.Tk()
-    self.gui = GuiApplication(master=root, vision=self.vision, game_manager=self.game, robot=self.robot, localization_manager=self.local)
+    if self.show_gui:
+      root = tk.Tk()
+      self.gui = GuiApplication(master=root, vision=self.vision, game_manager=self.game, robot=self.robot, localization_manager=self.local)
      
     # TEMP
-    self.robot.move_raw(-300, -300, -300, -300)
+    #self.robot.move_raw(-TOP_SPEED, -TOP_SPEED, -TOP_SPEED, -TOP_SPEED)
     #self.local.subscribe_to_events(self.new_waypoint)
     #self.last_waypoint = None
+    self.robot.move_raw(800, -800, -800, 800)
+    threading.Timer(4.6, self.stop_robot).start()
+  def stop_robot(self):
+    print('stopping')
+    self.robot.stop()
+  
+  def toggle_callback(self):
+    print('toggled press')
 
-  def vertex_callback(self, vert):
-    print('at a vertex!!', vert)   
- 
   def direction_callback(self, direction):
+    if self.reached_vertex:
+      return
+
     can_update = (time.time() - self.last_time) > 0.4
     if direction < -0.3 and can_update:
-      print("GO RIGHT last time")
+      print("GO RIGHT")
       self.last_time = time.time()
-      self.robot.move_raw(-300, -100, -300, -100)
+      self.robot.move_raw(-TOP_SPEED, -MIN_SPEED, -TOP_SPEED, -MIN_SPEED)
     elif direction > 0.3 and can_update:
       print("GO LEFT")
       self.last_time = time.time()
-      self.robot.move_raw(-100, -300, -100, -300)
+      self.robot.move_raw(-MIN_SPEED, -TOP_SPEED, -MIN_SPEED, -TOP_SPEED)
     elif direction > -0.3 and direction < 0.3 and can_update:
-       self.robot.move_raw(-300, -300, -300, -300)
+       self.robot.move_raw(-TOP_SPEED, -TOP_SPEED, -TOP_SPEED, -TOP_SPEED)
        self.last_time = time.time()
-       print('STRAINGT')
+       print('GO STRIAGHT')
     
+  def vertex_callback(self, vertex):
+    print('AT VERTEX!')
+    return
+    if self.reached_vertex:
+      return
+      
+    self.reached_vertex = True
+    self.robot.stop()
+
   def new_waypoint(self):
     # On new waypoint
     curr = self.local.current_waypoint
@@ -76,8 +111,14 @@ class MainApplication():
 
   def start(self):
     self.vision.start()
-    self.gui.mainloop()
+    self.toggle.start()
+    
+    if self.show_gui:
+      self.gui.mainloop()
+    else:
+      while True:
+        self.vision.read_rgb()
 
-    # Stop visioning
     self.vision.stop()
     self.robot.stop()
+    self.toggle.stop()

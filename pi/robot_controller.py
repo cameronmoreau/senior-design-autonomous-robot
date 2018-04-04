@@ -59,7 +59,7 @@ class RobotController():
       try:
         self.serial.write(s.encode())
       except:
-         print('Couldnt write serial')
+        print('Couldnt write serial')
     
     # Send event
     self.__notify_event()

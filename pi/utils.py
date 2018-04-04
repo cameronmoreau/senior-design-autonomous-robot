@@ -40,21 +40,22 @@ def Center(moments):
     return x, y
 
 #removes white, gameboard background 
-def RemoveBackground(image, b):
-    up = 100
+def RemoveBackground(image):
+    frame = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    # frame = image
+
     # create NumPy arrays from the boundaries
     lower = np.array([0, 0, 0], dtype = "uint8")
-    upper = np.array([up, up, up], dtype = "uint8")
+    # upper = np.array([100, 100, 100], dtype = "uint8")
+    upper = np.array([180, 255, 80], dtype = "uint8")
     #----------------COLOR SELECTION-------------- (Remove any area that is whiter than 'upper')
-    if b == True:
-        mask = cv2.inRange(image, lower, upper)
-        image = cv2.bitwise_and(image, image, mask = mask)
-        image = cv2.bitwise_not(image, image, mask = mask)
-        image = (255-image)
-        return image
-    else:
-        return image
-    #////////////////COLOR SELECTION/////////////
+
+    mask = cv2.inRange(frame, lower, upper)
+    frame = cv2.cvtColor(frame, cv2.COLOR_HSV2RGB)
+    frame = cv2.bitwise_and(frame, frame, mask = mask)
+    frame = cv2.bitwise_not(frame, frame, mask = mask)
+    frame = (255-frame)
+    return frame
 
 
 #trying to leave only a grey area (in progress)
