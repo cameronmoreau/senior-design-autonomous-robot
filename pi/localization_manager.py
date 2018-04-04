@@ -1,16 +1,23 @@
 import time, math
 from threading import Timer
+from enum import Enum
 from robot_controller import *
 
 DISTANCE_THRESHOLD = 150
 DISTANCE_PER_TICK = 5
 ROTATION_PER_TICK = 5
 
+class RobotState(Enum):
+  FOLLOWING_LINE = 1
+  AT_VERTEX = 2
+  WAITING = 2
+
 class LocalizationManager():
   def __init__(self, robot=None, game=None, start_x=None, start_y=None):
     self.thread = None
     self.robot = robot
     self.game = game
+    self.state = RobotState.WAITING
 
     # Localization vars
     self.position_x = start_x
@@ -25,10 +32,10 @@ class LocalizationManager():
   
   # This is where you the callback for vertex detection is. If on_vertex is True it is on vertex, false is not
   def on_vertex_change(self, on_vertex):
-  	print(str(on_vertex))
+    self.state = RobotState.AT_VERTEX
   	
   def on_direction_change(self, direction):
-  	print(str(direction))
+    self.state = RobotState.FOLLOWING_LINE
   	
   def set_position(self, x, y):
     self.position_x = x

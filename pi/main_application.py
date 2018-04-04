@@ -30,17 +30,14 @@ class MainApplication():
 
     # TEMP
     self.reached_vertex = True
-    
-    # State
-    self.is_toggled = False
+    self.started = True
     
     # REAL STUFF
     self.game = GameManager('config.json')
     self.robot = RobotController(simulate=not USE_SERIAL)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
-    #self.vision = VisionManager(vertex_callback=self.local.on_vertex_change, direction_callback=self.local.on_direction_change)
-    self.vision = VisionManager(vertex_callback=self.vertex_callback, direction_callback=self.direction_callback)
+    self.vision = VisionManager(vertex_callback=self.local.on_vertex_change, direction_callback=self.local.on_direction_change)
     self.toggle = ToggleManager(toggle_callback=self.toggle_callback)
     
     # UI
@@ -52,8 +49,8 @@ class MainApplication():
     #self.robot.move_raw(-TOP_SPEED, -TOP_SPEED, -TOP_SPEED, -TOP_SPEED)
     #self.local.subscribe_to_events(self.new_waypoint)
     #self.last_waypoint = None
-    self.robot.move_raw(800, -800, -800, 800)
-    threading.Timer(4.6, self.stop_robot).start()
+    # self.robot.move_raw(800, -800, -800, 800)
+    # threading.Timer(4.6, self.stop_robot).start()
     
   def stop_robot(self):
     print('stopping')
@@ -61,6 +58,13 @@ class MainApplication():
   
   def toggle_callback(self):
     print('toggled press')
+
+    if self.started:
+      self.robot.stop()
+    else:
+      self.robot.move_raw(800, -800, -800, 800)
+    
+    self.started = not self.started
 
   def direction_callback(self, direction):
     if self.reached_vertex:

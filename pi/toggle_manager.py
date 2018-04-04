@@ -30,6 +30,8 @@ class ToggleManager(Thread):
     while self.running:
       if USE_PI:
         toggle = GPIO.input(GPIO_TOGGLE)
+      else:
+        toggle = False
       
       if not self.last_val and toggle:
         self.toggle_callback()
