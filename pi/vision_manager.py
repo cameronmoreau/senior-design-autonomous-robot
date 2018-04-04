@@ -20,12 +20,11 @@ if 'pi' in sys.argv:
 
 # Use pi cam or regular cam
 if USE_PI:
-	from picamera.array import PiRGBArray
-	from picamera import PiCamera
 	from imutils.video.pivideostream import PiVideoStream
+	print('Using PiCam')
 else:
   from imutils.video.webcamvideostream import WebcamVideoStream
-  print('Not a pi')
+  print('Using WebCam')
 
 class VisionManager():
 	def __init__(self, vertex_callback=None, direction_callback=None):
@@ -33,10 +32,6 @@ class VisionManager():
 		
 		if USE_PI:
 		  self.camera = PiVideoStream(resolution=(640,480))
-		  #camera = PiCamera()
-		  #camera.resolution = (640, 480)
-		  #raw_capture = PiRGBArray(camera, size=camera.resolution)
-		  #self.stream = camera.capture_continuous(raw_capture, format='bgr', use_vido_port=True)
 		else:
 		  #self.stream = cv2.VideoCapture(0)
 		  self.camera = WebcamVideoStream(src=1)
@@ -62,6 +57,9 @@ class VisionManager():
 	# Used for tk
 	def read_rgb(self, detect_lanes=True):
 		frame = self.camera.read()
+		if frame is None:
+		  return None		
+		
 		(b,g,r) = cv2.split(frame)
 		frame = cv2.merge((r, g, b))
 		

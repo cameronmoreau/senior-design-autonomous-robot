@@ -10,17 +10,26 @@ from navigation_manager import *
 from localization_manager import *
 from vision_manager import *
 
+USE_SERIAL = False
+USE_GUI = True
+
+if 'serial' in sys.argv:
+  USE_SERIAL = True
+
+if 'nogui' in sys.argv:
+  USE_GUI = False
+
 class MainApplication():
-  def __init__(self, gui=True):
+  def __init__(self):
     self.last_time = time.time()
-    self.show_gui = gui
+    self.show_gui = USE_GUI
 
     # TEMP
     self.reached_vertex = False
     
     # REAL STUFF
     self.game = GameManager('config.json')
-    self.robot = RobotController(simulate=True)
+    self.robot = RobotController(simulate=not USE_SERIAL)
     self.nav = NavigationManager(self.game.path)
     self.local = LocalizationManager(robot=self.robot, game=self.game, start_x=380, start_y=0)
     #self.vision = VisionManager(vertex_callback=self.local.on_vertex_change, direction_callback=self.local.on_direction_change)
@@ -55,6 +64,10 @@ class MainApplication():
        print('GO STRIAGHT')
     
   def vertex_callback(self, vertex):
+    print('AT VERTEX!')
+    if self.reached_vertex:
+      return
+      
     self.reached_vertex = True
     self.robot.stop()
 
