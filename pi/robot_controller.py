@@ -55,11 +55,11 @@ class RobotController():
         adjustments[1] = -1
         adjustments[2] = -1
     	
-    s = 'm %s %s %s %s' % (str(speed * adjustments[0]), str(speed * adjustments[1]), str(speed * adjustments[2]), str(speed * adjustments[3]))
-    try:
-      self.serial.write(s.encode())
-    except:
-       print('Couldnt write serial')
+      s = 'm %s %s %s %s' % (str(speed * adjustments[0]), str(speed * adjustments[1]), str(speed * adjustments[2]), str(speed * adjustments[3]))
+      try:
+        self.serial.write(s.encode())
+      except:
+        print('Couldnt write serial')
     
     # Send event
     self.__notify_event()

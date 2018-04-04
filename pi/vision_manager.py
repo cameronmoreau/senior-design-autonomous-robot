@@ -39,7 +39,7 @@ class VisionManager():
 		  #self.stream = camera.capture_continuous(raw_capture, format='bgr', use_vido_port=True)
 		else:
 		  #self.stream = cv2.VideoCapture(0)
-		  self.camera = WebcamVideoStream(src=0)
+		  self.camera = WebcamVideoStream(src=1)
 		  
 		  # Set width/height
 		  self.camera.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -66,7 +66,7 @@ class VisionManager():
 		frame = cv2.merge((r, g, b))
 		
 		if detect_lanes:
-			tmp_frame = utils.RemoveBackground(frame, False)
+			tmp_frame = utils.RemoveBackground(frame)
 			
 			directions, contours = utils.SlicePart(tmp_frame, self.frames, N_SLICES)
 			
@@ -81,10 +81,8 @@ class VisionManager():
 			if not self.on_vertex:	
 				m = statistics.mean(directions[0:6])
 				self.direction_callback(m/250)
-				
-				#if m >= 80 or m <= -80:
-					#self.direction_callback(m / 250)
-		return frame
+
+		return tmp_frame
 
 	def stop(self):
 		self.camera.stop()
