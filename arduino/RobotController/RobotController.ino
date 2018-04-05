@@ -3,6 +3,7 @@
 // See license.txt for license details.
 
 #include <SoftwareSerial.h>
+#include <Servo.h>  
 #include <Kangaroo.h>
 
 // Arduino TX (pin 11) goes to Kangaroo S1
@@ -14,6 +15,8 @@
 #define TX_PIN_RIGHT 1
 #define RX_PIN_RIGHT 0
 
+#define SERVO_PIN 16
+
 // Independent mode channels on Kangaroo are, by default, '1' and '2'.
 SoftwareSerial  SerialPortLeft(RX_PIN_LEFT, TX_PIN_LEFT);
 SoftwareSerial  SerialPortRight(RX_PIN_RIGHT, TX_PIN_RIGHT);
@@ -24,24 +27,31 @@ KangarooChannel K2(KLeft, '2');
 KangarooChannel K3(KRight, '1');
 KangarooChannel K4(KRight, '2');
 
+// Servo
+Servo servo;
+
+// Global vars are great
 int speeds[] = {0, 0, 0, 0};
 
 void setup()
 {
+  // Setup Motor serial control
   SerialPortLeft.begin(9600);
   SerialPortLeft.listen();
 
   SerialPortRight.begin(9600);
   SerialPortRight.listen();
 
+  // Setup Serial
   Serial.begin(9600);
   delay(500);
   Serial.println("setup()");
 
-  // .wait() waits until the command is 'finished'. For speed, this means it reached near the
-  // requested speed. You can also call K1.s(speed); without .wait() if you want to command it
-  // but not wait to get up to speed. If you do this, you may want to use K1.getS().value()
-  // to check progress.
+  // Setup Servo
+  servo.attach(SERVO_PIN);
+  servo.write(180);
+
+  // Init Motors
   K1.start();
   K1.home().wait();
   K2.start();
@@ -50,6 +60,8 @@ void setup()
   K3.home().wait();
   K4.start();
   K4.home().wait();
+
+  Serial.println("End setup");
 }
 
 void loop()
@@ -103,6 +115,27 @@ void changeMovement(char *si1, char *si2, char *si3, char *si4)
 }
 
 /**
+ * changeArmServo
+ * pos = 0 arm down
+ * pos = 1 arm up
+ * 
+ * @parm pos NULL or input of arm position
+ */
+void changeArmServo(char *posInput) {
+  int servoPos = 180;
+
+  // Read arm inpu pos
+  if (posInput != NULL) {
+    int pos = atoi(posInput);
+
+    // Put yo arms up, hommie
+    if (pos == 1) servoPos = 80; 
+  }
+  Serial.printf("Arm at %d\n", servoPos);
+  servo.write(servoPos);
+}
+
+/**
  * Read serial input and run events
  */
 void consumeIncommingMessage()
@@ -126,6 +159,7 @@ void consumeIncommingMessage()
 
   if (split[0] != NULL) {
     if (strcmp(split[0], "h") == 0) displayHeartbeat();                       // h
+    else if (strcmp(split[0], "a") == 0) changeArmServo(split[1]);            // a <pos>
     else if (strcmp(split[0], "g") == 0) Serial.println("TODO GRABBER");       // g
     else if (strcmp(split[0], "m") == 0) changeMovement(split[1], split[2], split[3], split[4]); // m <speed1> <speed2> <speed3> <speed4>
   }
