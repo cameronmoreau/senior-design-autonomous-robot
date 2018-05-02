@@ -16,6 +16,9 @@
 #define RX_PIN_RIGHT 0
 
 #define SERVO_PIN 16
+#define SERVO_POS_UP 80
+#define SERVO_POS_DOWN 170
+#define MAGNET_PIN 18
 
 // Independent mode channels on Kangaroo are, by default, '1' and '2'.
 SoftwareSerial  SerialPortLeft(RX_PIN_LEFT, TX_PIN_LEFT);
@@ -48,10 +51,16 @@ void setup()
   Serial.println("setup()");
 
   // Setup Servo
+  Serial.println("Init servo");
   servo.attach(SERVO_PIN);
-  servo.write(180);
+  servo.write(SERVO_POS_DOWN);
+
+  // Setup magnet
+  Serial.println("Init magnet");
+  pinMode(MAGNET_PIN, OUTPUT);
 
   // Init Motors
+  Serial.println("Init motors");
   K1.start();
   K1.home().wait();
   K2.start();
@@ -122,17 +131,33 @@ void changeMovement(char *si1, char *si2, char *si3, char *si4)
  * @parm pos NULL or input of arm position
  */
 void changeArmServo(char *posInput) {
-  int servoPos = 180;
+  int servoPos = SERVO_POS_DOWN;
 
   // Read arm inpu pos
   if (posInput != NULL) {
     int pos = atoi(posInput);
 
     // Put yo arms up, hommie
-    if (pos == 1) servoPos = 80; 
+    if (pos == 1) servoPos = SERVO_POS_UP; 
   }
   Serial.printf("Arm at %d\n", servoPos);
   servo.write(servoPos);
+}
+
+/**
+ * changeMagnet
+ * input = 0 magnet disabled
+ * input = 1 magnet enabled
+ * 
+ * @parm input NULL or input of magnet enabled
+ */
+void changeMagnet(char *input) {
+  bool enabled = false;
+  if (strcmp(input, "1") == 0) enabled = true;
+
+  Serial.printf("Magnet at %d\n", enabled);
+  if (enabled) digitalWrite(MAGNET_PIN, HIGH);
+  else digitalWrite(MAGNET_PIN, LOW);
 }
 
 /**
@@ -160,7 +185,7 @@ void consumeIncommingMessage()
   if (split[0] != NULL) {
     if (strcmp(split[0], "h") == 0) displayHeartbeat();                       // h
     else if (strcmp(split[0], "a") == 0) changeArmServo(split[1]);            // a <pos>
-    else if (strcmp(split[0], "g") == 0) Serial.println("TODO GRABBER");       // g
+    else if (strcmp(split[0], "g") == 0) changeMagnet(split[1]);              // g
     else if (strcmp(split[0], "m") == 0) changeMovement(split[1], split[2], split[3], split[4]); // m <speed1> <speed2> <speed3> <speed4>
   }
 
